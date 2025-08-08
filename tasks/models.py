@@ -6,6 +6,13 @@ from boards.models import Board
 User = get_user_model()
 
 
+class TaskStatus(models.TextChoices):
+    TODO = 'todo', 'Задачи'
+    IN_PROGRESS = 'in_progress', 'В процессе'
+    REVIEW = 'review', 'На проверке'
+    DONE = 'done', 'Выполнено'
+
+
 class Task(models.Model):
     title = models.CharField(max_length=100, verbose_name='Заголовок')
     description = models.TextField(verbose_name='Описание')
@@ -14,12 +21,19 @@ class Task(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Доска'
     )
-    status = models.CharField(max_length=100, verbose_name='Статус')
+    status = models.CharField(
+        max_length=100,
+        verbose_name='Статус',
+        choices=TaskStatus.choices,
+        default=TaskStatus.TODO,
+    )
     assignee = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='assigned_tasks',
-        verbose_name='Исполнитель'
+        verbose_name='Исполнитель',
     )
     creator = models.ForeignKey(
         User,
@@ -41,3 +55,4 @@ class Task(models.Model):
     class Meta:
         verbose_name = 'Задача'
         verbose_name_plural = 'Задачи'
+        ordering = ('position', 'created_at')

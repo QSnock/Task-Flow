@@ -52,3 +52,5 @@ class BoardMember(models.Model):
     class Meta:
         verbose_name = 'Участник доски'
         verbose_name_plural = 'Участники доски'
+        unique_together = ('board', 'user')
+        ordering = ('-added_at',)
