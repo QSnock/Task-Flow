@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои доски - Task Flow{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="bi bi-kanban text-primary"></i>
+                Мои доски
+            </h2>
+            <a href="{% url 'boards:board_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i>
+                Создать доску
+            </a>
+        </div>
+
+        {% if pending_invitations %}
+            <div class="alert alert-info border-0 shadow-sm mb-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-envelope text-primary me-2"></i>
+                    <h5 class="mb-0">Приглашения в доски</h5>
+                </div>
+                
+                {% for invitation in pending_invitations %}
+                    <div class="d-flex justify-content-between align-items-center {% if not forloop.last %}border-bottom pb-2 mb-2{% endif %}">
+                        <div>
+                            <strong>{{ invitation.board.title }}</strong>
+                            <br>
+                            <small class="text-muted">
+                                от {{ invitation.invited_by.username }} • {{ invitation.invited_at|date:"d.m.Y H:i" }}
+                            </small>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <form method="post" action="{% url 'boards:invitation_respond' invitation.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="accept">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="bi bi-check-lg"></i> Принять
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'boards:invitation_respond' invitation.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="decline">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-x-lg"></i> Отклонить
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if boards %}
+            <div class="row">
+                {% for board in boards %}
+                                    <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0 board-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-1">{{ board.title }}</h5>
+                                    {% if board.owner == user %}
+                                        <div class="dropdown">
+                                            <button class="btn btn-link btn-sm text-muted p-0" data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <form method="post" action="{% url 'boards:board_delete' board.id %}" 
+                                                          onsubmit="return confirm('Удалить доску {{ board.title }}?')">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="dropdown-item text-danger">
+                                                            <i class="bi bi-trash"></i> Удалить
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if board.description %}
+                                    <p class="card-text text-muted small">{{ board.description|truncatewords:15 }}</p>
+                                {% endif %}
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <small class="text-muted">
+                                        <i class="bi bi-person"></i> {{ board.owner.username }}
+                                    </small>
+                                    <small class="text-muted">
+                                        {{ board.created_at|date:"d.m.Y" }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-0 pt-0">
+                                <a href="{% url 'boards:board_detail' board.id %}" class="btn btn-outline-primary w-100">
+                                    <i class="bi bi-arrow-right"></i> Открыть доску
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-kanban display-1 text-muted"></i>
+                <h4 class="text-muted mt-3">У вас пока нет досок</h4>
+                <p class="text-muted">Создайте первую доску для управления задачами</p>
+                <a href="{% url 'boards:board_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    Создать первую доску
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

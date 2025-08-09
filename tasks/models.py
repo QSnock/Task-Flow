@@ -19,7 +19,8 @@ class Task(models.Model):
     board = models.ForeignKey(
         Board,
         on_delete=models.CASCADE,
-        verbose_name='Доска'
+        verbose_name='Доска',
+        related_name='tasks'
     )
     status = models.CharField(
         max_length=100,

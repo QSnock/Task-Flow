@@ -32,7 +32,10 @@ class Board(models.Model):
 
 class BoardMember(models.Model):
     board = models.ForeignKey(
-        Board, on_delete=models.CASCADE, verbose_name='Доска'
+        Board,
+        on_delete=models.CASCADE,
+        verbose_name='Доска',
+        related_name='members'
     )
     user = models.ForeignKey(
         User,
@@ -54,3 +57,47 @@ class BoardMember(models.Model):
         verbose_name_plural = 'Участники доски'
         unique_together = ('board', 'user')
         ordering = ('-added_at',)
+
+
+class InvitationStatus(models.TextChoices):
+    PENDING = 'pending', 'Ожидает'
+    ACCEPTED = 'accepted', 'Принято'
+    DECLINED = 'declined', 'Отклонено'
+
+
+class BoardInvitation(models.Model):
+    board = models.ForeignKey(
+        Board, on_delete=models.CASCADE, verbose_name='Доска',
+        related_name='invitations'
+    )
+    invited_user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        verbose_name='Приглашенный пользователь',
+        related_name='board_invitations'
+    )
+    invited_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name='Пригласил',
+        related_name='sent_invitations'
+    )
+    status = models.CharField(
+        max_length=20, choices=InvitationStatus.choices,
+        default=InvitationStatus.PENDING, verbose_name='Статус'
+    )
+    invited_at = models.DateTimeField(
+        auto_now_add=True, verbose_name='Дата приглашения'
+    )
+    responded_at = models.DateTimeField(
+        null=True, blank=True, verbose_name='Дата ответа'
+    )
+
+    class Meta:
+        verbose_name = 'Приглашение в доску'
+        verbose_name_plural = 'Приглашения в доски'
+        unique_together = ('board', 'invited_user')
+        ordering = ('-invited_at',)
+
+    def __str__(self):
+        return (
+            f'{self.invited_user.username} -> {self.board.title} '
+            f'({self.status})'
+        )

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Пригласить пользователя - {{ board.title }} - Task Flow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-plus"></i>
+                    Пригласить пользователя в доску "{{ board.title }}"
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">
+                            {{ form.username.label }}
+                        </label>
+                        {{ form.username }}
+
+                        <datalist id="usersList">
+                            {% for user in form.available_users %}
+                                <option value="{{ user.username }}">
+                                    {{ user.username }}{% if user.first_name or user.last_name %} - {{ user.first_name }} {{ user.last_name }}{% endif %}
+                                </option>
+                            {% endfor %}
+                        </datalist>
+                        
+                        {% if form.username.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.username.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Введите имя пользователя или выберите из выпадающего списка
+                        </div>
+                    </div>
+
+                    {% if form.available_users %}
+                        <div class="mb-3">
+                            <label class="form-label">Доступные пользователи:</label>
+                            <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                                <div class="row">
+                                    {% for user in form.available_users %}
+                                        <div class="col-md-6 mb-2">
+                                            <button type="button" 
+                                                    class="btn btn-outline-secondary btn-sm w-100 text-start user-select-btn" 
+                                                    data-username="{{ user.username }}">
+                                                <i class="bi bi-person"></i> {{ user.username }}
+                                                {% if user.first_name or user.last_name %}
+                                                    <br><small class="text-muted">{{ user.first_name }} {{ user.last_name }}</small>
+                                                {% endif %}
+                                            </button>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {% if form.available_users|length == 50 %}
+                                    <div class="text-center mt-2">
+                                        <small class="text-muted">
+                                            <i class="bi bi-info-circle"></i>
+                                            Показаны первые 50 пользователей. Используйте поиск для точного поиска.
+                                        </small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            Все пользователи уже участники этой доски или приглашены.
+                        </div>
+                    {% endif %}
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i>
+                            Отправить приглашение
+                        </button>
+                        <a href="{% url 'boards:board_detail' board.id %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i>
+                            Назад к доске
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{% url 'boards:board_list' %}">
+            <i class="bi bi-kanban"></i> Task Flow
+        </a>
+        
+        <div class="navbar-nav ms-auto">
+            {% if user.is_authenticated %}
+                <span class="navbar-text me-3">
+                    Привет, {{ user.username }}!
+                </span>
+                <a class="nav-link" href="{% url 'accounts:logout' %}">
+                    <i class="bi bi-box-arrow-right"></i> Выйти
+                </a>
+            {% else %}
+                <a class="nav-link" href="{% url 'accounts:login' %}">
+                    <i class="bi bi-box-arrow-in-right"></i> Войти
+                </a>
+                <a class="nav-link" href="{% url 'accounts:register' %}">
+                    <i class="bi bi-person-plus"></i> Регистрация
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
